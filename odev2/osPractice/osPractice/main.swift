@@ -30,7 +30,7 @@ while control{
     print("MENU:")
     print("1 - add new process")
     print("2 - terminating the process")
-    print("3 - state of memory in this moment")
+    print("3 - state of memory at this moment")
     print("0 - exit")
     
     
@@ -51,8 +51,15 @@ while control{
             if processSize > memorySize{
                 print("Process size is outof size memory!")
             }else{
-                processSizeDict[processName] = processSize
-                let emptyAddressIndex = memoryState.allIndices(of: 0)
+                let allEmptyAddressIndex = memoryState.allIndices(of: 0)
+                var emptyAddressIndex = [Int]()
+                let rangePointer = memorySize - processSize
+                
+                for i in allEmptyAddressIndex{
+                    if i <= rangePointer{
+                        emptyAddressIndex.append(i)
+                    }
+                }
                 
                 for i in emptyAddressIndex{
                     var counter = 0
@@ -65,9 +72,15 @@ while control{
                         for j in i...i+processSize-1{
                             memoryState[j] = 1
                         }
+                        processSizeDict[processName] = processSize
                         processStartingIndexDict[processName] = i
                         break
                     }
+                }
+                
+                if !processSizeDict.contains(where: { $0.key == processName}){
+                    print("Our empty memory is \(allEmptyAddressIndex.count)")
+                    print("But we can't save your process!!!")
                 }
 
             }
