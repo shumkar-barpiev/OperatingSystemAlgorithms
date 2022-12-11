@@ -21,7 +21,7 @@ while control{
     
     
     print("Please enter number: ")
-    let num = Int(readLine()!)!
+    let num = Int(readLine()!) ?? 5
     
     switch num {
     case 1:
@@ -40,7 +40,7 @@ while control{
         }else{
             print("\nAll process:\n")
             print("| Process ID\t| Priority\t")
-            print("|--------------------------")
+            print("--------------------------")
             for process in allProcess{
                 print("|\t\t \(process[0])\t\t| \t\(process[1])\t")
             }
@@ -48,14 +48,20 @@ while control{
         
         
     case 3:
-        print("show all process after scheduling")
         let sortedProcessByPriority = allProcess.sorted(by: {$0[1] < $1[1] })
-        print("\nAfter Scheduling:\n")
-        print("| Process ID\t| Priority\t")
-        print("|--------------------------")
-        for process in sortedProcessByPriority{
-            print("|\t\t \(process[0])\t\t| \t\(process[1])\t")
+        if sortedProcessByPriority.count == 0{
+            print("There is not any processes!")
+        }else{
+            print("show all process after scheduling")
+            
+            print("\nAfter Scheduling:\n")
+            print("| Process ID\t| Priority\t")
+            print("|--------------------------")
+            for process in sortedProcessByPriority{
+                print("|\t\t \(process[0])\t\t| \t\(process[1])\t")
+            }
         }
+        
         
     case 0:
         print("\nThe program terminated!!!")

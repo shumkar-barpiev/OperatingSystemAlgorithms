@@ -13,7 +13,7 @@ func setProcessValue(_ allProcess: [[Int]]) -> [[Int]]{
     var processes = allProcess
     
     for i in 0...allProcess.count-1{
-        processes[i].append(Int.random(in: 0 ..< 5))  //arrivialTime
+        processes[i].append(Int.random(in: 0 ..< 5))  //arrivalTime
         processes[i].append(Int.random(in: 0 ..< 100))  //priorityValue
         processes[i].append(Int.random(in: 5 ..< 25))  //burstTime
     }
