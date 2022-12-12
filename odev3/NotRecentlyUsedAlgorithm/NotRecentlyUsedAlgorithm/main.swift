@@ -74,38 +74,15 @@ func completePageTable(_ ram: [[Int]], _ hdd: [[Int]]){
     }
     
     if hddPageCount > 0{
-        if pageTables.count == 0{ // egerde page Table bosh bolso barak bar je jok ekendigin tekshebey ele kosho berebiz
-            for i in 0...hddPageCount-1{
-                var tempPage = [Int]()
-                tempPage.append(hdd[i][0]) // pageID
-                tempPage.append(hdd[i][1]) // pageNumber
-                tempPage.append(0) // pageLocation 1 - RAM, 0 - HDD
-                tempPage.append(0) // referenced
-                tempPage.append(0) //modified
-                pageTables.append(tempPage)
-            }
-        } else{
-            var indexesPageTables = [Int]()
-            for i in pageTables{
-                indexesPageTables.append(i[0])
-            }
-            
-            for i in 0...hddPageCount-1{
-                if indexesPageTables.contains(hdd[i][0]){
-                    continue
-                }else{
-                    var tempPage = [Int]()
-                    tempPage.append(hdd[i][0]) // pageID
-                    tempPage.append(hdd[i][1]) // pageNumber
-                    tempPage.append(0) // pageLocation 1 - RAM, 0 - HDD
-                    tempPage.append(0) // referenced
-                    tempPage.append(0) //modified
-                    pageTables.append(tempPage)
-                }
-            }
-            
+        for i in 0...hddPageCount-1{
+            var tempPage = [Int]()
+            tempPage.append(hdd[i][0]) // pageID
+            tempPage.append(hdd[i][1]) // pageNumber
+            tempPage.append(0) // pageLocation 1 - RAM, 0 - HDD
+            tempPage.append(0) // referenced
+            tempPage.append(0) //modified
+            pageTables.append(tempPage)
         }
-        
     }
 }
 
@@ -132,11 +109,48 @@ func notRecentlyUsedPage(_ ram: [[Int]]){
         }
     }
     
-    print(notReferencedNotModified)
-    print(notReferencedModified)
-    print(referencedNotModified)
-    print(referencedModified)
+//    print(notReferencedNotModified)
+//    print(notReferencedModified)
+//    print(referencedNotModified)
+//    print(referencedModified)
     
+    if notReferencedNotModified.count > 0{
+        for page in RAM{
+            if notReferencedNotModified[0] == page{
+                pageID += 1
+                RAM[page[1]] = []
+                RAM[page[1]].append(pageID) // pageID
+                RAM[page[1]].append(page[1]) // page number
+                break
+            }
+        }
+        let h = checkMemory(HDD)
+        HDD[h.emptyIndex[0]] = notReferencedNotModified[0]
+        HDD[h.emptyIndex[0]][1] = h.emptyIndex[0]
+        pageTables.removeAll()
+        
+    }else if notReferencedModified.count > 0{
+        
+    }else if referencedNotModified.count > 0{
+        
+    }else if referencedModified.count > 0{
+        
+    }
+    
+}
+
+
+func deletePage(_ pageID: Int){
+    for page in pageTables{
+        if page[0] == pageID{
+            if page[2] == 1{
+                RAM[page[1]] = []
+            }else if page[2] == 0{
+                HDD[page[1]] = []
+            }
+        }
+    }
+    completePageTable(RAM, HDD)
 }
 
 
@@ -175,6 +189,7 @@ func main(){
                 if ramCount == 0{
                     print("RAM toldu")
                     notRecentlyUsedPage(RAM)
+                    completePageTable(RAM, HDD)
                 }else{
                     //RAM
                     pageID += 1
@@ -182,10 +197,10 @@ func main(){
                     RAM[ramEmptyMemoryIndex.first!].append(ramEmptyMemoryIndex.first!) //page number for RAM
                     
                     print("\npage added succesfully!")
+                    completePageTable(RAM, HDD)
                 }
             }
             
-            completePageTable(RAM, HDD)
         case 2:
             print("two")
         case 3:
@@ -193,25 +208,56 @@ func main(){
         case 4:
             print("four")
         case 5:
-            print("five")
+            print("Barakty jok kyluu:")
+            
+            
+            
         case 6:
             let ram = checkMemory(RAM)
-            let countPages = sizeRAM - ram.number
-            print("\nRAM:\n")
-            print("Page ID\t\t| Page Number")
-            print("-------------------------")
-            for i in 0...countPages-1{
-                print("\t \(RAM[i][0])\t\t| \t\(RAM[i][1])")
+            let hdd = checkMemory(HDD)
+            let countPagesRam = sizeRAM - ram.number
+            let countPagesHdd = sizeHDD - hdd.number
+            let emptyIndexRAM = ram.emptyIndex
+            let emptyIndexHDD = hdd.emptyIndex
+            
+            if countPagesRam > 0{
+                print("\nRAM:\n")
+                print("Page ID\t\t| Page Number")
+                print("-------------------------")
+                for i in 0...sizeRAM-1{
+                    if !emptyIndexRAM.contains(i){
+                        print("\t \(RAM[i][0])\t\t| \t\(RAM[i][1])")
+                    }
+                }
+            } else{
+                print("RAM bosh")
             }
             
             
-            print("\n\nPage Tables:\n")
-            print("Page Location: \n1 - RAM\n0 - HDD\n")
+            if countPagesHdd > 0{
+                print("\nHDD:\n")
+                print("Page ID\t\t| Page Number")
+                print("-------------------------")
+                for i in 0...sizeHDD-1{
+                    if !emptyIndexHDD.contains(i){
+                        print("\t \(HDD[i][0])\t\t| \t\(HDD[i][1])")
+                    }
+                }
+            } else{
+                print("HDD bosh")
+            }
+            
+            if pageTables.count > 0{
+                print("\n\nPage Tables:\n")
+                print("Page Location: \n1 - RAM\n0 - HDD\n")
 
-            print("Page ID\t\t| Page Number\t| Page Location\t| Referenced\t| Modified")
-            print("-----------------------------------------------------------------------")
-            for i in 0...pageTables.count-1{
-                print("\t \(pageTables[i][0])\t\t| \t\t\(pageTables[i][1])\t\t| \t\t\(pageTables[i][2])\t\t| \t\t\(pageTables[i][3])\t\t| \t\(pageTables[i][4])")
+                print("Page ID\t\t| Page Number\t| Page Location\t| Referenced\t| Modified")
+                print("-----------------------------------------------------------------------")
+                for i in 0...pageTables.count-1{
+                    print("\t \(pageTables[i][0])\t\t| \t\t\(pageTables[i][1])\t\t| \t\t\(pageTables[i][2])\t\t| \t\t\(pageTables[i][3])\t\t| \t\(pageTables[i][4])")
+                }
+            }else{
+                print("Page Table bosh")
             }
             
         case 0:
