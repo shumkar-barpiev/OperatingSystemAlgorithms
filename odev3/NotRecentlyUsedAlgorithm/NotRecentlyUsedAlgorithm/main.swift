@@ -150,6 +150,7 @@ func deletePage(_ pageID: Int){
             }
         }
     }
+    pageTables.removeAll()
     completePageTable(RAM, HDD)
 }
 
@@ -206,11 +207,26 @@ func main(){
         case 3:
             print("three")
         case 4:
-            print("four")
+            print("Please, enter the pageID: ")
+            let pageId = Int(readLine()!) ?? -1
+            
+            var allPageId = [Int]()
+            
+            for page in pageTables{
+                allPageId.append(page[0])
+            }
+            
+            if pageId > 0{
+                if allPageId.contains(pageId){
+                    deletePage(pageId)
+                }else{
+                    print("\nThere is not like this page!!!")
+                }
+            }else{
+                print("\nYour input is incorrect!!!")
+            }
         case 5:
-            print("Barakty jok kyluu:")
-            
-            
+            print("five:")
             
         case 6:
             let ram = checkMemory(RAM)
@@ -230,7 +246,7 @@ func main(){
                     }
                 }
             } else{
-                print("RAM bosh")
+                print("\n\nRAM bosh")
             }
             
             
