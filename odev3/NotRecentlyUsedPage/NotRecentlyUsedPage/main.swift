@@ -293,7 +293,80 @@ func main(){
                 }
             }
         case 2:
-            print("two")
+            print("Enter the pageID: ")
+            let pageId = Int(readLine()!) ?? -1
+                        
+            var allPageId = [Int]()
+            for page in pageTables{
+                allPageId.append(page.pageId)
+            }
+            
+            if pageId > 0{
+                if allPageId.contains(pageId){
+                    var allPageIdRAM = [Int]()
+                    
+                    for page in RAM{
+                        allPageIdRAM.append(page.pageId)
+                    }
+                    if allPageIdRAM.contains(pageId){ // RAM'de jaygashkan barakka kairyluu kerek bolso
+                        for page in pageTables{
+                            if page.pageId == pageId{
+                                page.referenced = 1
+                                break
+                            }
+                        }
+                        print("\n to \(pageId) - page referenced succesfully!")
+                    }else{ // HDD'degi barakka kairyluu kerek bolso, algach fizikalyk eske tashylyp kelet. andan son kairylsak bolot
+                        var objPage = Page()
+                        for page in HDD{
+                            if pageId == page.pageId{
+                                objPage = page
+                            }
+                        }
+                        
+                        var pageIndex = 0
+                        for i in 0...HDD.count-1{
+                            if HDD[i].pageId == pageId{
+                                pageIndex = i
+                                break
+                            }
+                        }
+                        HDD.remove(at: pageIndex)
+                        
+                        RAM = notRecentlyUsedPage(RAM)
+                        var emptyPageNumber = 0
+                        if RAM.count > 0{
+                            var ramPagesIndex = [Int]()
+                            for page in RAM{
+                                ramPagesIndex.append(page.pageNumber)
+                            }
+                            
+                            for i in 0...sizeRAM-1{
+                                if !ramPagesIndex.contains(i){
+                                    emptyPageNumber = i
+                                    break
+                                }
+                            }
+                        }
+                        
+                        objPage.pageNumber = emptyPageNumber
+                        RAM.append(objPage)
+                        
+                        for page in pageTables{
+                            if page.pageId == pageId{
+                                page.pageLocation = 1
+                                page.referenced = 1
+                                break
+                            }
+                        }
+                        print("\n\(pageId) - page referenced succesfully!")
+                    }
+                }else{
+                    print("\nThere is not like this page!!!")
+                }
+            }else{
+                print("\nYour input is incorrect!!!")
+            }
         case 3:
             print("Enter the pageID: ")
             let pageId = Int(readLine()!) ?? -1
@@ -392,8 +465,8 @@ func main(){
             }
             
         case 5:
-            print("five:")
-            
+            print("\nБаардык барактардын \"Referenced\" жана \"Modified\" биттеринин маанисин 0 кылуу")
+            pageTables = completePageTable(RAM, HDD)
         case 6:
             if RAM.count > 0{
                 print("\nRAM:\n")
@@ -403,7 +476,7 @@ func main(){
                     print("\t \(page.pageId)\t\t| \t\(page.pageNumber)")
                 }
             } else{
-                print("\n\nRAM bosh")
+                print("RAM bosh")
             }
             
             if HDD.count > 0{
@@ -438,7 +511,6 @@ func main(){
     }
 }
 
-
 var RAM = [Page]()
 var HDD = [Page]()
 var pageTables = [PageTable]() // pageId, pageNumber, pageLocation, referenced, modified,
@@ -446,6 +518,5 @@ let sizeRAM = 10
 let sizeHDD = 20
 var control = true
 var pageID = 0
-
 
 main()
