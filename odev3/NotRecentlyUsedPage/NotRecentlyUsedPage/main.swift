@@ -18,6 +18,19 @@ class PageTable: Page{
     var modified = 0
 }
 
+func addToPageTable(_ page: Page, _ pageLocation: Int){
+    
+    let pageTableObj = PageTable()
+    pageTableObj.pageId = page.pageId
+    pageTableObj.pageNumber = page.pageNumber
+    pageTableObj.pageLocation = pageLocation
+    pageTableObj.referenced = 0
+    pageTableObj.modified = 0
+    
+    pageTables.append(pageTableObj)
+
+}
+
 func completePageTable(_ ram: [Page], _ hdd: [Page]) -> [PageTable]{
     var pageTable = [PageTable]()
     
@@ -84,7 +97,7 @@ func notRecentlyUsedPage(_ ram: [Page]) -> [Page]{
     var referencedModified = [Page]()
     
     
-    for ramPage in ram{
+    for ramPage in ram{ // RAM'degi barakchalardy 4 gruppaga ajyratuu
         for page in pageTables{
             if ramPage.pageId == page.pageId{
                 if page.referenced == 0 && page.modified == 0{
@@ -99,9 +112,12 @@ func notRecentlyUsedPage(_ ram: [Page]) -> [Page]{
             }
         }
     }
+//    print(notReferencedNotModified)
+//    print(notReferencedModified)
+//    print(referencedNotModified)
+//    print(referencedModified)
     
-    
-    if notReferencedNotModified.count > 0{
+    if notReferencedNotModified.count > 0{ //not referenced, not modified
         let objPage = Page()
         objPage.pageId = notReferencedNotModified[0].pageId
         objPage.pageNumber = HDD.count
@@ -112,17 +128,84 @@ func notRecentlyUsedPage(_ ram: [Page]) -> [Page]{
         for i in 0...ram.count-1{
             if ram[i].pageId == notReferencedNotModified[0].pageId && ram[i].pageNumber == notReferencedNotModified[0].pageNumber{
                 pageIndex = i
+                
                 break
+            }
+        }
+        
+        for page in pageTables{
+            if notReferencedNotModified[0].pageId == page.pageId{
+                page.pageLocation = 0
             }
         }
         tempRAM.remove(at: pageIndex)
             
-    }else if notReferencedModified.count > 0{
+    }else if notReferencedModified.count > 0{ //not Referenced, modified
+        let objPage = Page()
+        objPage.pageId = notReferencedModified[0].pageId
+        objPage.pageNumber = HDD.count
         
-    }else if referencedNotModified.count > 0{
+        HDD.append(objPage)
         
-    }else if referencedModified.count > 0{
+        var pageIndex = 0
+        for i in 0...ram.count-1{
+            if ram[i].pageId == notReferencedModified[0].pageId && ram[i].pageNumber == notReferencedModified[0].pageNumber{
+                pageIndex = i
+                
+                break
+            }
+        }
         
+        for page in pageTables{
+            if notReferencedModified[0].pageId == page.pageId{
+                page.pageLocation = 0
+            }
+        }
+        tempRAM.remove(at: pageIndex)
+    }else if referencedNotModified.count > 0{ //referenced, not modified
+        let objPage = Page()
+        objPage.pageId = referencedNotModified[0].pageId
+        objPage.pageNumber = HDD.count
+        
+        HDD.append(objPage)
+        
+        var pageIndex = 0
+        for i in 0...ram.count-1{
+            if ram[i].pageId == referencedNotModified[0].pageId && ram[i].pageNumber == referencedNotModified[0].pageNumber{
+                pageIndex = i
+                
+                break
+            }
+        }
+        
+        for page in pageTables{
+            if referencedNotModified[0].pageId == page.pageId{
+                page.pageLocation = 0
+            }
+        }
+        tempRAM.remove(at: pageIndex)
+    }else if referencedModified.count > 0{ //referenced, modified
+        let objPage = Page()
+        objPage.pageId = referencedModified[0].pageId
+        objPage.pageNumber = HDD.count
+        
+        HDD.append(objPage)
+        
+        var pageIndex = 0
+        for i in 0...ram.count-1{
+            if ram[i].pageId == referencedModified[0].pageId && ram[i].pageNumber == referencedModified[0].pageNumber{
+                pageIndex = i
+                
+                break
+            }
+        }
+        
+        for page in pageTables{
+            if referencedModified[0].pageId == page.pageId{
+                page.pageLocation = 0
+            }
+        }
+        tempRAM.remove(at: pageIndex)
     }
     
     return tempRAM
@@ -150,7 +233,8 @@ func main(){
             if RAM.count == sizeRAM && HDD.count == sizeHDD{
                 print("\n\nEs tolup kaldy.")
             }else{
-                if RAM.count < sizeRAM{
+                let pageObj = Page()
+                if RAM.count < sizeRAM{ // RAM tolup kalgan bolso, kereksiz bir barakty hdd'ge jiberip boshogon mestaga jany barakty jaygashtyruu
                     var emptyPageNumber = 0
                     if RAM.count > 0{
                         var ramPagesIndex = [Int]()
@@ -166,15 +250,13 @@ func main(){
                         }
                     }
                     pageID += 1
-                    let pageObj = Page()
                     pageObj.pageId = pageID
                     pageObj.pageNumber = emptyPageNumber
                     RAM.append(pageObj)
                     
-                    pageTables = completePageTable(RAM, HDD)
                     print("\npage added succesfully!")
                                         
-                }else{
+                }else{ // RAM bosh bolso jany barakty jaygashtyruu
                     print("RAM toldu")
                     RAM = notRecentlyUsedPage(RAM)
                     
@@ -193,12 +275,21 @@ func main(){
                         }
                     }
                     pageID += 1
-                    let pageObj = Page()
                     pageObj.pageId = pageID
                     pageObj.pageNumber = emptyPageNumber
                     RAM.append(pageObj)
-                    pageTables = completePageTable(RAM, HDD)
                     print("\npage added succesfully!")
+                }
+                
+                var allIdRAM = [Int]()
+                for i in RAM{
+                    allIdRAM.append(i.pageId)
+                }
+                
+                if allIdRAM.contains(pageObj.pageId){ // Jany koshulgan barak RAM'de je HDD'de jaygashkanyna karap baraktar jadybalyna koshuu
+                    addToPageTable(pageObj, 1) //1-RAM'ge jaygashkashkan
+                }else{
+                    addToPageTable(pageObj, 0) //0-HDD'ge jaygashkan
                 }
             }
         case 2:
@@ -219,7 +310,7 @@ func main(){
                     for page in RAM{
                         allPageIdRAM.append(page.pageId)
                     }
-                    if allPageIdRAM.contains(pageId){
+                    if allPageIdRAM.contains(pageId){ // RAM'de jaygashkan barakty ozgortuu kerek bolso
                         for page in pageTables{
                             if page.pageId == pageId{
                                 page.modified = 1
@@ -227,7 +318,7 @@ func main(){
                             }
                         }
                         print("\n\(pageId) - page modified succesfully!")
-                    }else{
+                    }else{ // HDD'degi barakty ozgortuu kerek bolso, algach fizikalyk eske tashylyp kelet. andan son ozgortulot
                         var objPage = Page()
                         for page in HDD{
                             if pageId == page.pageId{
@@ -262,10 +353,10 @@ func main(){
                         
                         objPage.pageNumber = emptyPageNumber
                         RAM.append(objPage)
-                        pageTables = completePageTable(RAM, HDD)
                         
                         for page in pageTables{
                             if page.pageId == pageId{
+                                page.pageLocation = 1
                                 page.modified = 1
                                 break
                             }
